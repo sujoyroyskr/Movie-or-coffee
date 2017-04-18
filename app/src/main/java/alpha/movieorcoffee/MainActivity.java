@@ -22,6 +22,8 @@ import com.twitter.sdk.android.core.services.StatusesService;
 import com.twitter.sdk.android.tweetui.SearchTimeline;
 import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 
+import java.util.List;
+
 import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
@@ -32,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private TwitterLoginButton loginButton;
     private TextView tv;
     private TwitterSession session;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,17 +53,19 @@ public class MainActivity extends AppCompatActivity {
                 // TODO: Remove toast and use the TwitterSession's userID
                 // with your app's user model
                 String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
+
                 loginButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
                 loginButton.setCallback(new Callback<TwitterSession>() {
                     @Override
                     public void success(Result<TwitterSession> result) {
                         // The TwitterSession is also available through:
                         // Twitter.getInstance().core.getSessionManager().getActiveSession()
-                        TwitterSession session = result.data;
+                        session = result.data;
                         // TODO: Remove toast and use the TwitterSession's userID
                         // with your app's user model
 
                         String msg = "@" + session.getUserName() + " logged in! (#" + session.getUserId() + ")";
+
 
                         tv.setText(msg);
                         loginButton.setVisibility(View.GONE);
@@ -80,7 +85,25 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("TwitterKit", "Login with Twitter failure", exception);
             }
         });
-
+        tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                TwitterApiClient twitterApiClient = TwitterCore.getInstance().getApiClient();
+// Can also use Twitter directly: Twitter.getApiClient()
+                Long tweetID = session.getUserId();
+                StatusesService statusesService = twitterApiClient.getStatusesService();
+                statusesService.show(tweetID, null, null, null, new Callback<com.twitter.sdk.android.core.models.Tweet>() {
+                    @Override
+                    public void success(Result<Tweet> result) {
+                        //Do something with result, which provides a Tweet inside of result.data
+                        Log.d("Tweet Data", result.data.text);
+                    }
+                    public void failure(TwitterException exception) {
+                        //Do something on failure
+                    }
+                });
+            }
+        });
     }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -88,7 +111,8 @@ public class MainActivity extends AppCompatActivity {
         // Make sure that the loginButton hears the result from any
         // Activity that it triggered.
         loginButton.onActivityResult(requestCode, resultCode, data);
+
     }
 
-
+    private void fetch(){}
 }
