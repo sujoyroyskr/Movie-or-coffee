@@ -24,7 +24,7 @@ android {
     defaultConfig {
         applicationId "alpha.movieorcoffee"
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -42,9 +42,15 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+    android {
+        useLibrary 'org.apache.http.legacy'
+    }
     compile 'com.android.support:appcompat-v7:25.0.0'
     testCompile 'junit:junit:4.12'
+    compile 'com.google.code.gson:gson:2.8.0'
     compile('com.twitter.sdk.android:twitter:2.3.2@aar') {
         transitive = true;
     }
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
+    compile 'com.google.android.gms:play-services:10.2.1'
 }
