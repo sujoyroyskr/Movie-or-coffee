@@ -1,12 +1,18 @@
 package alpha.movieorcoffee;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -25,7 +31,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.appindexing.Thing;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.twitter.sdk.android.Twitter;
@@ -94,11 +100,12 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout lv;
     private TwitterSession session;
     public static final String PREFS_NAME = "MyApp_Settings";
+    private static final int PERMISSION_REQUEST_CODE = 1;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
-    private GoogleApiClient client,mGoogleApiClient;
+    private GoogleApiClient client;
 
 
     @Override
@@ -120,6 +127,12 @@ public class MainActivity extends AppCompatActivity {
         refresh.setVisibility(View.GONE);
         navigate.setVisibility(View.GONE);
 
+        // Here, thisActivity is the current activity
+        if ( Build.VERSION.SDK_INT >= 23 &&
+                ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission( getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        }
         /*SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         // Reading from SharedPreferences
         String value = settings.getString("key", "");
@@ -209,17 +222,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -248,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStart() {
-        mGoogleApiClient.connect();
+
 
         super.onStart();
 
@@ -261,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onStop() {
-        mGoogleApiClient.disconnect();
+
 
         super.onStop();
 
@@ -374,6 +382,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
             GPSTracker tracker = new GPSTracker(MainActivity.this);
             if (!tracker.canGetLocation()) {
                 tracker.showSettingsAlert();
@@ -381,7 +390,7 @@ public class MainActivity extends AppCompatActivity {
                 latitude = tracker.getLatitude();
                 longitude = tracker.getLongitude();
             }
-            if (latitude==0.0 && longitude==0.0) {
+            while (latitude == 0.0 && longitude==0.0) {
                 latitude = tracker.getLatitude();
                 longitude = tracker.getLongitude();
             }
@@ -464,4 +473,5 @@ public class MainActivity extends AppCompatActivity {
             tv.setText("No places found");
         }
     }
+    
 }
